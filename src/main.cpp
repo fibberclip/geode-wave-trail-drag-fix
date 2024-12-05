@@ -19,17 +19,22 @@ class $modify (CCMotionStreak)
             m_fields->elapsedTime -= m_fields->cutInterval; // Reset the timer
 
             // Toggle cutting state
-            if (m_fields->isCutting) {
-                this->stopStroke(); // Resumes the trail
-            } else {
-                this->resumeStroke(); // Stops the trail for a bit
-            }
-
             m_fields->isCutting = !m_fields->isCutting; // Flip the state
+
+            if (m_fields->isCutting) {
+                this->stopStroke(); // Stop adding new points temporarily
+            } else {
+                this->resumeStroke(); // Resume adding points
+            }
         }
 
         // Update the trail's behavior, applying the delta time
         CCMotionStreak::update(delta);
+
+        // If not cutting, ensure we continue to add points
+        if (!m_fields->isCutting) {
+            this->addPoint(this->getPosition()); // Add current position to the trail
+        }
     }
 
     bool isDrawing() {
