@@ -43,4 +43,15 @@ class $modify(CCMotionStreak)
             }
         }
     }
+
+    virtual void draw() {
+        // Call the original draw method to ensure normal behavior
+        if (m_bStroke) {
+            CCMotionStreak::draw();
+        } else {
+            // Custom behavior when the trail is not visible
+            // Optionally you can log or manipulate the drawing process here
+            CCLOG("Drawing is skipped, trail not active");
+        }
+    }
 };
