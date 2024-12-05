@@ -12,21 +12,27 @@ class $modify(CCMotionStreak) {
         bool isTrailActive = false;  // Tracks whether the trail is naturally active
     };
 
-    virtual void reset() {
-        // Called when the trail is reset (e.g., stops existing naturally)
+    virtual void reset() override {
+        // Called when the trail is reset (stops existing naturally)
         m_fields->isTrailActive = false;
-        m_fields->elapsedTime = 0.0f; // Reset timer
-        m_fields->isCutting = false; // Reset cutting state
+        m_fields->elapsedTime = 0.0f; // Reset the timer
+        m_fields->isCutting = false;  // Reset cutting state
         CCMotionStreak::reset();
     }
 
-    virtual void startStroke() {
-        // Called when the trail starts existing naturally
+    void resumeStreak() override {
+        // Called when the trail is resumed
         m_fields->isTrailActive = true;
-        CCMotionStreak::startStroke();
+        CCMotionStreak::resumeStreak();
     }
 
-    virtual void update(float delta) {
+    void stopStreak() override {
+        // Called when the trail is stopped
+        m_fields->isTrailActive = false;
+        CCMotionStreak::stopStreak();
+    }
+
+    virtual void update(float delta) override {
         if (m_fields->isTrailActive) {
             // Only run cutting logic if the trail is active
             m_fields->elapsedTime += delta;
@@ -34,10 +40,11 @@ class $modify(CCMotionStreak) {
             if (m_fields->elapsedTime >= m_fields->cutInterval) {
                 m_fields->elapsedTime -= m_fields->cutInterval; // Reset the timer
 
+                // Toggle cutting state
                 if (m_fields->isCutting) {
-                    this->stopStroke(); // Stop the trail
+                    CCMotionStreak::resumeStreak(); // Resume the trail
                 } else {
-                    this->resumeStroke(); // Resume the trail
+                    CCMotionStreak::stopStreak(); // Stop the trail for a bit
                 }
 
                 m_fields->isCutting = !m_fields->isCutting; // Flip cutting state
