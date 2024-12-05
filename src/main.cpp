@@ -1,7 +1,6 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CCMotionStreak.hpp>
 #include <Geode/modify/PlayerObject.hpp>
-#include <unordered_map>
 
 using namespace geode::prelude;
 
@@ -21,18 +20,18 @@ class $modify(CCMotionStreak) {
         }
 
         // Apply the cutting effect
-        m_fields->elapsedTime += delta;
+        this->m_fields.elapsedTime += delta;  // Accessing directly without `m_fields`
 
-        if (m_fields->elapsedTime >= m_fields->cutInterval) {
-            m_fields->elapsedTime -= m_fields->cutInterval;
+        if (this->m_fields.elapsedTime >= this->m_fields.cutInterval) {
+            this->m_fields.elapsedTime -= this->m_fields.cutInterval;
 
-            if (m_fields->isCutting) {
+            if (this->m_fields.isCutting) {
                 this->resumeStroke(); // Resume the trail
             } else {
                 this->stopStroke(); // Temporarily cut the trail
             }
 
-            m_fields->isCutting = !m_fields->isCutting; // Toggle cutting state
+            this->m_fields.isCutting = !this->m_fields.isCutting; // Toggle cutting state
         }
 
         CCMotionStreak::update(delta); // Default behavior
@@ -43,13 +42,15 @@ class $modify(CCMotionStreak) {
 class $modify(PlayerObject) {
     void activateStreak() {
         if (m_regularTrail) {
-            m_regularTrail->m_fields->elapsedTime = 0.0f; // Reset cutting timer
-            m_regularTrail->m_fields->isCutting = false;  // Ensure trail starts visible
+            m_regularTrail->m_bStroke = true; // Ensure trail is active
+            m_regularTrail->m_fields.elapsedTime = 0.0f; // Reset cutting timer
+            m_regularTrail->m_fields.isCutting = false;  // Ensure trail starts visible
         }
 
         if (m_shipStreak) {
-            m_shipStreak->m_fields->elapsedTime = 0.0f; // Reset cutting timer
-            m_shipStreak->m_fields->isCutting = false;  // Ensure trail starts visible
+            m_shipStreak->m_bStroke = true; // Ensure trail is active
+            m_shipStreak->m_fields.elapsedTime = 0.0f; // Reset cutting timer
+            m_shipStreak->m_fields.isCutting = false;  // Ensure trail starts visible
         }
 
         PlayerObject::activateStreak(); // Call original
@@ -57,13 +58,15 @@ class $modify(PlayerObject) {
 
     void resetStreak() {
         if (m_regularTrail) {
-            m_regularTrail->m_fields->elapsedTime = 0.0f; // Reset cutting timer
-            m_regularTrail->m_fields->isCutting = false;  // Reset to visible state
+            m_regularTrail->m_bStroke = false; // Deactivate trail
+            m_regularTrail->m_fields.elapsedTime = 0.0f; // Reset cutting timer
+            m_regularTrail->m_fields.isCutting = false;  // Reset to visible state
         }
 
         if (m_shipStreak) {
-            m_shipStreak->m_fields->elapsedTime = 0.0f; // Reset cutting timer
-            m_shipStreak->m_fields->isCutting = false;  // Reset to visible state
+            m_shipStreak->m_bStroke = false; // Deactivate trail
+            m_shipStreak->m_fields.elapsedTime = 0.0f; // Reset cutting timer
+            m_shipStreak->m_fields.isCutting = false;  // Reset to visible state
         }
 
         PlayerObject::resetStreak(); // Call original
