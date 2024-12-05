@@ -14,8 +14,8 @@ public:
 
     virtual void update(float delta)
     {
-        // Access Fields
-        auto& fields = this->getFields();
+        // Access the Fields of this modification
+        auto& fields = this->getMod<Fields>();
 
         // Increment the timer with each frame
         fields.timer += delta;
