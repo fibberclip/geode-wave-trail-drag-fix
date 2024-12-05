@@ -23,7 +23,7 @@ class $modify(CCMotionStreak)
             if (m_fields->elapsedTime >= m_fields->cutInterval) {
                 m_fields->elapsedTime -= m_fields->cutInterval; // Reset the timer
 
-                // Toggle cutting state
+                // Toggle cutting state if the trail is active
                 if (m_fields->isCutting) {
                     this->resumeStroke(); // Resume the trail
                     CCLOG("Trail Resumed");
@@ -45,12 +45,12 @@ class $modify(CCMotionStreak)
     }
 
     virtual void draw() {
-        // Call the original draw method to ensure normal behavior
-        if (m_bStroke) {
+        // Handle the trail drawing based on the stroke state
+        if (m_bStroke && m_uNuPoints > 0) {
+            // If the trail is active and has points, draw the trail
             CCMotionStreak::draw();
         } else {
-            // Custom behavior when the trail is not visible
-            // Optionally you can log or manipulate the drawing process here
+            // If the trail is inactive, prevent flickering and let fading happen naturally
             CCLOG("Drawing is skipped, trail not active");
         }
     }
