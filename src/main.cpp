@@ -1,5 +1,6 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CCMotionStreak.hpp>
+#include <Geode/console.hpp>
 
 using namespace geode::prelude;
 
@@ -16,15 +17,14 @@ class $modify (CCMotionStreak)
 
         // Check if the interval has passed
         if (timer >= cutInterval) {
-            // Reset the timer and cut the trail
+            // Reset the timer
             timer = 0.0f;
 
-            // Toggle the trail state (stop or resume)
-            if (this->isStrokeActive()) {
-                this->stopStroke(); // Stop the trail
-            } else {
-                this->resumeStroke(); // Resume the trail
-            }
+            // Cut the trail by stopping and then resuming
+            this->stopStroke(); // Stop the trail
+            // This will restart the trail in the next update, so we are triggering the cut period here
+        } else {
+            this->resumeStroke(); // Ensure the trail resumes after a "cut"
         }
 
         // Update the trail's behavior, applying the delta time
