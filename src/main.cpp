@@ -22,9 +22,9 @@ class $modify (CCMotionStreak)
             m_fields->isCutting = !m_fields->isCutting; // Flip the state
 
             if (m_fields->isCutting) {
-                this->stopStroke(); // Stop adding new points temporarily
+                this->resumeStroke(); // Stop adding new points temporarily
             } else {
-                this->resumeStroke(); // Resume adding points
+                this->stopStroke(); // Resume adding points
             }
         }
 
@@ -33,6 +33,6 @@ class $modify (CCMotionStreak)
     }
 
     bool isDrawing() {
-        return m_bStroke && m_uNuPoints > 0; // Check if stroke is active and points exist
+        return m_bStroke && m_uNuPoints > 5; // Check if stroke is active and points exist
     }
 };
