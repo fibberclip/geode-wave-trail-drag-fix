@@ -10,14 +10,13 @@ class $modify(PlayerObject) {
         static std::mt19937 rng(rd());
         static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-        // Retrieve the setting value directly using getSettingValue
-        float skipProbability = Mod::get()->getSettingValue<float>("skip_probability");
-
-        // Randomly skip trail updates based on probability
-        if (dist(rng) < skipProbability) {
-            return; // Skip trail updates for this frame
+        // Apply the trail-cutting bug behavior based on FPS or speed
+        // Assuming that FPS or speed is a factor in the bug (can modify this logic as needed)
+        if (dist(rng) < 0.05f) {  // Adjust the probability as needed for the effect
+            return; // Skip the trail update to simulate the bug
         }
 
-        PlayerObject::update(delta); // Call the original update logic
+        // Call the original update logic to update the player object and trail
+        PlayerObject::update(delta);
     }
 };
