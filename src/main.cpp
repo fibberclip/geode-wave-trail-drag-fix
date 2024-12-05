@@ -1,57 +1,34 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CCMotionStreak.hpp>
-#include <Geode/modify/PlayerObject.hpp>
 
 using namespace geode::prelude;
 
-class $modify(CCMotionStreak) {
+class $modify (CCMotionStreak)
+{
     struct Fields {
         float elapsedTime = 0.0f;    // Tracks the elapsed time
-        float cutInterval = 0.2f;    // Interval for the trail cutting
+        float cutInterval = 0.2f;    // Interval for the trail cutting (default: 0.4s)
         bool isCutting = false;      // Indicates whether the trail is currently being cut
-        bool isTrailActive = false;  // Tracks whether the trail is naturally active
     };
 
-    virtual void reset() override {
-        // Called when the trail is reset (stops existing naturally)
-        m_fields->isTrailActive = false;
-        m_fields->elapsedTime = 0.0f; // Reset the timer
-        m_fields->isCutting = false;  // Reset cutting state
-        CCMotionStreak::reset();
-    }
+    virtual void update(float delta)
+    {
+        m_fields->elapsedTime += delta;
 
-    void resumeStreak() override {
-        // Called when the trail is resumed
-        m_fields->isTrailActive = true;
-        CCMotionStreak::resumeStreak();
-    }
+        if (m_fields->elapsedTime >= m_fields->cutInterval) {
+            m_fields->elapsedTime -= m_fields->cutInterval; // Reset the timer
 
-    void stopStreak() override {
-        // Called when the trail is stopped
-        m_fields->isTrailActive = false;
-        CCMotionStreak::stopStreak();
-    }
-
-    virtual void update(float delta) override {
-        if (m_fields->isTrailActive) {
-            // Only run cutting logic if the trail is active
-            m_fields->elapsedTime += delta;
-
-            if (m_fields->elapsedTime >= m_fields->cutInterval) {
-                m_fields->elapsedTime -= m_fields->cutInterval; // Reset the timer
-
-                // Toggle cutting state
-                if (m_fields->isCutting) {
-                    CCMotionStreak::resumeStreak(); // Resume the trail
-                } else {
-                    CCMotionStreak::stopStreak(); // Stop the trail for a bit
-                }
-
-                m_fields->isCutting = !m_fields->isCutting; // Flip cutting state
+            // Toggle cutting state
+            if (this->m_bStroke && m_fields->isCutting) {
+                this->stopStroke(); // Resumes the trail
+            } else {
+                this->resumeStroke(); // Stops the trail for a bit
             }
+
+            m_fields->isCutting = !m_fields->isCutting; // Flip the state
         }
 
-        // Always update the base functionality
+        // Update the trail's behavior, applying the delta time
         CCMotionStreak::update(delta);
     }
 };
