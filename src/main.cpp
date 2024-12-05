@@ -1,5 +1,6 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CCMotionStreak.hpp>
+#include <Geode/console.hpp>
 #include <random>
 
 using namespace geode::prelude;
@@ -16,14 +17,15 @@ class $modify (CCMotionStreak)
         int randChance = dis(gen);
         
         // Customizable chance for the bug to happen (75% here as per your request)
-        bool isCutting = randChance < 75; 
+        bool isCutting = randChance < 75;
 
+        // Adjust the speed of the trail to create the cutting effect
         if (isCutting) {
-            // Stop emitting the trail (cutting effect)
-            this->setDrawState(false); // stop drawing the trail
+            // Stop the trail from emitting new segments by setting speed to 0
+            this->setSpeed(0); // no new trail segments
         } else {
-            // Resume emitting the trail
-            this->setDrawState(true); // resume drawing the trail
+            // Resume normal trail behavior by restoring speed
+            this->setSpeed(10); // or any value you want for normal speed
         }
 
         // Update the trail's behavior, applying the delta time, which controls its appearance
