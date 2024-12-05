@@ -7,12 +7,18 @@ class $modify (CCMotionStreak)
 {
     struct Fields {
         float elapsedTime = 0.0f;    // Tracks the elapsed time
-        float cutInterval = 0.2f;    // Interval for the trail cutting (default: 0.4s)
+        float cutInterval = 0.15f;    // Interval for the trail cutting (default: 0.4s)
         bool isCutting = false;      // Indicates whether the trail is currently being cut
     };
 
     virtual void update(float delta)
     {
+        // Check if the trail is currently visible or active before applying the cutting logic
+        if (!this->isActive()) {
+            CCMotionStreak::update(delta);
+            return;
+        }
+
         m_fields->elapsedTime += delta;
 
         if (m_fields->elapsedTime >= m_fields->cutInterval) {
