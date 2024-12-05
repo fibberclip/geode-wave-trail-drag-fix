@@ -7,7 +7,7 @@ class $modify (CCMotionStreak)
 {
     struct Fields {
         float elapsedTime = 0.0f;    // Tracks the elapsed time
-        float cutInterval = 0.2f;    // Interval for the trail cutting (default: 0.4s)
+        float cutInterval = 0.2f;    // Interval for the trail cutting (default: 0.2s)
         bool isCutting = false;      // Indicates whether the trail is currently being cut
     };
 
@@ -15,6 +15,7 @@ class $modify (CCMotionStreak)
     {
         // Only start cutting if the trail exists (i.e., m_bStroke is true)
         if (this->m_bStroke) {
+            // Increment the timer only when the trail is present
             m_fields->elapsedTime += delta;
 
             if (m_fields->elapsedTime >= m_fields->cutInterval) {
@@ -22,7 +23,7 @@ class $modify (CCMotionStreak)
 
                 // Toggle cutting state
                 if (m_fields->isCutting) {
-                    this->stopStroke(); // Stops the trail temporarily
+                    this->stopStroke(); // Temporarily stops the trail
                 } else {
                     this->resumeStroke(); // Resumes the trail
                 }
