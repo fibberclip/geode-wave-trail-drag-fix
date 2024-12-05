@@ -15,9 +15,9 @@ class $modify (PlayerObject) {
         PlayerObject::activateStreak(); // Call the original method
     }
 
-    void deactivateStreak() {
-        m_fields->isTrailActive = false; // Set the trail as inactive
-        PlayerObject::deactivateStreak(); // Call the original method
+    void toggleStreak(bool active) {
+        // Manually handle streak state, since deactivateStreak isn't usable
+        m_fields->isTrailActive = active;
     }
 };
 
@@ -32,8 +32,14 @@ class $modify (CCMotionStreak) {
     virtual void update(float delta) {
         // Access the parent object (assumed to be PlayerObject)
         auto player = dynamic_cast<PlayerObject*>(this->getParent());
-        if (!player || !player->m_fields->isTrailActive) {
-            // Skip cutting logic if the trail isn't active
+        if (!player) {
+            CCMotionStreak::update(delta);
+            return;
+        }
+
+        // Check trail activation status
+        auto& playerFields = player->m_fields;
+        if (!playerFields->isTrailActive) {
             CCMotionStreak::update(delta);
             return;
         }
