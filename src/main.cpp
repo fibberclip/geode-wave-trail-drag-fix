@@ -3,53 +3,36 @@
 
 using namespace geode::prelude;
 
-class $modify(CCMotionStreak)
+class $modify (CCMotionStreak)
 {
     struct Fields {
         float elapsedTime = 0.0f;    // Tracks the elapsed time
-        float cutInterval = 0.2f;    // Interval for the trail cutting
-        bool isCutting = false;      // Indicates whether cutting is active
+        float cutInterval = 0.2f;    // Interval for the trail cutting (default: 0.2s)
+        bool isCutting = false;      // Indicates whether the trail is currently being cut
     };
 
-    virtual void update(float delta) override {
-        // Call base class update to ensure normal trail functionality
-        CCMotionStreak::update(delta);
+    virtual void update(float delta) {
+        m_fields->elapsedTime += delta;
 
-        // Ensure trail is active before applying custom logic
-        if (m_uNuPoints > 0 && m_bStroke) {
-            m_fields->elapsedTime += delta;
+        // Check if the trail is currently being drawn
+        if (this->isDrawing() && m_fields->elapsedTime >= m_fields->cutInterval) {
+            m_fields->elapsedTime -= m_fields->cutInterval; // Reset the timer
 
-            if (m_fields->elapsedTime >= m_fields->cutInterval) {
-                m_fields->elapsedTime -= m_fields->cutInterval; // Reset the timer
-
-                // Toggle cutting without disrupting internal rendering states
-                if (m_fields->isCutting) {
-                    *m_pPointState = 1.0f; // Allow points to render normally
-                } else {
-                    *m_pPointState = 0.0f; // Hide points temporarily
-                }
-
-                m_fields->isCutting = !m_fields->isCutting; // Flip cutting state
-
-                // Debugging: Log trail cutting state
-                CCLOG("Trail Cutting State: %s, NuPoints: %u", 
-                    m_fields->isCutting ? "OFF" : "ON", m_uNuPoints);
-            }
-        } else {
-            // Reset cutting state when trail is inactive
+            // Toggle cutting state
             if (m_fields->isCutting) {
-                *m_pPointState = 1.0f; // Ensure points render normally
-                m_fields->isCutting = false;
+                this->stopStroke(); // Resumes the trail
+            } else {
+                this->resumeStroke(); // Stops the trail for a bit
             }
+
+            m_fields->isCutting = !m_fields->isCutting; // Flip the state
         }
+
+        // Update the trail's behavior, applying the delta time
+        CCMotionStreak::update(delta);
     }
 
-    virtual void draw() override {
-        // Debugging: Log internal state
-        CCLOG("Draw Call - Stroke: %d, NuPoints: %u, PointState: %f", 
-            m_bStroke, m_uNuPoints, *m_pPointState);
-
-        // Call base draw method to ensure fade effect remains
-        CCMotionStreak::draw();
+    bool isDrawing() {
+        return m_bStroke && m_uNuPoints > 0; // Check if stroke is active and points exist
     }
 };
