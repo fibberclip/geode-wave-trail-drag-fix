@@ -21,10 +21,10 @@ class $modify (CCMotionStreak)
         // Adjust the speed of the trail to create the cutting effect
         if (isCutting) {
             // Stop the trail from emitting new segments by setting speed to 0
-            this->setSpeed(0); // no new trail segments
+            this->stopStroke(); // no new trail segments
         } else {
             // Resume normal trail behavior by restoring speed
-            this->setSpeed(10); // or any value you want for normal speed
+            this->resumeStroke(); // or any value you want for normal speed
         }
 
         // Update the trail's behavior, applying the delta time, which controls its appearance
