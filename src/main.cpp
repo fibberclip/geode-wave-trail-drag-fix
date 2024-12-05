@@ -1,6 +1,6 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/CCMotionStreak.hpp>
-#include <Geode/PlayerObject.hpp>
+#include <Geode/binding/PlayerObject.hpp>
 
 using namespace geode::prelude;
 
