@@ -5,15 +5,12 @@
 
 using namespace geode::prelude;
 
-// Map to track additional fields for each streak
-static std::unordered_map<CCMotionStreak*, bool> trailStates;
-
 // Hook into CCMotionStreak to apply the cutting effect
 class $modify(CCMotionStreak) {
     struct Fields {
         float elapsedTime = 0.0f;    // Tracks the elapsed time
         float cutInterval = 0.2f;    // Interval for cutting
-        bool isCutting = false;      // Indicates if the trail is being cut
+        bool isCutting = false;      // Indicates if the trail is currently hidden
     };
 
     virtual void update(float delta) {
@@ -35,38 +32,38 @@ class $modify(CCMotionStreak) {
                 this->stopStroke(); // Temporarily cut the trail
             }
 
-            m_fields->isCutting = !m_fields->isCutting; // Toggle state
+            m_fields->isCutting = !m_fields->isCutting; // Toggle cutting state
         }
 
         CCMotionStreak::update(delta); // Default behavior
     }
 };
 
-// Hook into PlayerObject to activate/reset trails
+// Hook into PlayerObject to ensure trails work as expected
 class $modify(PlayerObject) {
     void activateStreak() {
-        // Handle m_regularTrail
         if (m_regularTrail) {
-            trailStates[m_regularTrail] = true; // Mark trail as active
+            m_regularTrail->m_fields->elapsedTime = 0.0f; // Reset cutting timer
+            m_regularTrail->m_fields->isCutting = false;  // Ensure trail starts visible
         }
 
-        // Handle m_shipStreak (if applicable)
         if (m_shipStreak) {
-            trailStates[m_shipStreak] = true; // Mark trail as active
+            m_shipStreak->m_fields->elapsedTime = 0.0f; // Reset cutting timer
+            m_shipStreak->m_fields->isCutting = false;  // Ensure trail starts visible
         }
 
         PlayerObject::activateStreak(); // Call original
     }
 
     void resetStreak() {
-        // Handle m_regularTrail
         if (m_regularTrail) {
-            trailStates[m_regularTrail] = false; // Mark trail as inactive
+            m_regularTrail->m_fields->elapsedTime = 0.0f; // Reset cutting timer
+            m_regularTrail->m_fields->isCutting = false;  // Reset to visible state
         }
 
-        // Handle m_shipStreak (if applicable)
         if (m_shipStreak) {
-            trailStates[m_shipStreak] = false; // Mark trail as inactive
+            m_shipStreak->m_fields->elapsedTime = 0.0f; // Reset cutting timer
+            m_shipStreak->m_fields->isCutting = false;  // Reset to visible state
         }
 
         PlayerObject::resetStreak(); // Call original
