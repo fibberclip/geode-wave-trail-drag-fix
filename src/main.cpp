@@ -5,7 +5,7 @@
 
 using namespace geode::prelude;
 
-// Map to track the active state of each CCMotionStreak
+// Map to track additional fields for each streak
 static std::unordered_map<CCMotionStreak*, bool> trailStates;
 
 // Hook into CCMotionStreak to apply the cutting effect
@@ -17,8 +17,8 @@ class $modify(CCMotionStreak) {
     };
 
     virtual void update(float delta) {
-        // Check if this streak is active
-        if (!trailStates[this]) {
+        // Check if this streak is active using the m_bStroke field
+        if (!m_bStroke) {
             CCMotionStreak::update(delta); // Default behavior
             return;
         }
@@ -42,23 +42,21 @@ class $modify(CCMotionStreak) {
     }
 };
 
-// Hook into PlayerObject to track when the trail starts/stops
+// Hook into PlayerObject to initialize/reset streaks
 class $modify(PlayerObject) {
     void activateStreak() {
-        // Get the current streak
-        auto streak = this->getMotionStreak();
+        auto streak = this->getMotionStreak(); // Obtain streak (if available)
         if (streak) {
-            trailStates[streak] = true; // Mark the trail as active
+            trailStates[streak] = true; // Mark trail as active
         }
 
         PlayerObject::activateStreak(); // Call original
     }
 
     void resetStreak() {
-        // Get the current streak
-        auto streak = this->getMotionStreak();
+        auto streak = this->getMotionStreak(); // Obtain streak (if available)
         if (streak) {
-            trailStates[streak] = false; // Mark the trail as inactive
+            trailStates[streak] = false; // Mark trail as inactive
         }
 
         PlayerObject::resetStreak(); // Call original
