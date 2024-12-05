@@ -11,13 +11,13 @@ class $modify (PlayerObject) {
     };
 
     void activateStreak() {
-        m_fields->isTrailActive = true; // Set the trail as active
+        getFields()->isTrailActive = true; // Set the trail as active
         PlayerObject::activateStreak(); // Call the original method
     }
 
     void toggleStreak(bool active) {
         // Manually handle streak state, since deactivateStreak isn't usable
-        m_fields->isTrailActive = active;
+        getFields()->isTrailActive = active;
     }
 };
 
@@ -38,8 +38,8 @@ class $modify (CCMotionStreak) {
         }
 
         // Check trail activation status
-        auto& playerFields = player->m_fields;
-        if (!playerFields->isTrailActive) {
+        auto& playerFields = player->getFields(); // Correct way to access fields
+        if (!playerFields.isTrailActive) {
             CCMotionStreak::update(delta);
             return;
         }
