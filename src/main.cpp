@@ -10,12 +10,17 @@ class $modify(PlayerObject) {
         static std::mt19937 rng(rd());
         static std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-        // Retrieve the 'skip_probability' setting as a float
-        auto skipProbability = Mod::get()->getSettingValue<float>("skip_probability");
+        // Retrieve the setting (will return a shared_ptr to a Setting)
+        auto setting = Mod::get()->getSetting("skip_probability");
 
-        // Randomly skip trail updates
-        if (dist(rng) < skipProbability) {
-            return; // Skip trail updates for this frame
+        // Ensure the setting is valid and retrieve its value
+        if (setting && setting->getType() == geode::SettingType::Float) {
+            float skipProbability = setting->asFloat(); // Convert it to a float
+
+            // Randomly skip trail updates based on probability
+            if (dist(rng) < skipProbability) {
+                return; // Skip trail updates for this frame
+            }
         }
 
         PlayerObject::update(delta); // Call the original update logic
