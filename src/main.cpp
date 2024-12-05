@@ -10,30 +10,35 @@ class $modify (PlayerObject) {
         bool isTrailActive = false; // Tracks whether the trail is active
     };
 
-    void activateStreak(bool active) {
-        m_fields->isTrailActive = active; // Track the active state
-        PlayerObject::activateStreak(active); // Call the original method
+    void activateStreak() {
+        m_fields->isTrailActive = true; // Set the trail as active
+        PlayerObject::activateStreak(); // Call the original method
+    }
+
+    void deactivateStreak() {
+        m_fields->isTrailActive = false; // Set the trail as inactive
+        PlayerObject::deactivateStreak(); // Call the original method
     }
 };
 
 // Modify CCMotionStreak to apply trail cutting
-class $modify (CCMotionStreak)
-{
+class $modify (CCMotionStreak) {
     struct Fields {
         float elapsedTime = 0.0f;    // Tracks the elapsed time
         float cutInterval = 0.4f;    // Interval for the trail cutting (default: 0.4s)
         bool isCutting = false;      // Indicates whether the trail is currently being cut
     };
 
-    virtual void update(float delta)
-    {
-        // Get the PlayerObject and check if the trail is active
-        auto player = reinterpret_cast<PlayerObject*>(this->getParent()); // Get the parent object
+    virtual void update(float delta) {
+        // Access the parent object (assumed to be PlayerObject)
+        auto player = dynamic_cast<PlayerObject*>(this->getParent());
         if (!player || !player->m_fields->isTrailActive) {
+            // Skip cutting logic if the trail isn't active
             CCMotionStreak::update(delta);
             return;
         }
 
+        // Update trail cutting logic
         m_fields->elapsedTime += delta;
 
         if (m_fields->elapsedTime >= m_fields->cutInterval) {
