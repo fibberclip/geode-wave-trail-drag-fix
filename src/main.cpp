@@ -1,30 +1,35 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PlayerObject.hpp>
 #include <Geode/modify/CCMotionStreak.hpp>
+#include <unordered_map>
 
 using namespace geode::prelude;
 
-float elapsedTime = 0.0f;
-float cutInterval = 0.2f;
-bool isCutting = false;
-bool streakActive = false; // New flag to track streak state
+// Static map to associate CCMotionStreak instances with their states
+static std::unordered_map<CCMotionStreak*, bool> streakStates;
 
 class $modify(CCMotionStreak) {
+    struct Fields {
+        float elapsedTime = 0.0f;
+        float cutInterval = 0.2f;
+        bool isCutting = false;
+    };
 
     virtual void update(float delta) {
-        if (streakActive) { // Only apply cutting logic when streak is active
-            elapsedTime += delta;
+        // Check if this streak is active
+        if (streakStates[this]) {
+            m_fields->elapsedTime += delta;
 
-            if (elapsedTime >= cutInterval) {
-                elapsedTime -= cutInterval;
+            if (m_fields->elapsedTime >= m_fields->cutInterval) {
+                m_fields->elapsedTime -= m_fields->cutInterval;
 
-                if (isCutting) {
+                if (m_fields->isCutting) {
                     this->stopStroke();
                 } else {
                     this->resumeStroke();
                 }
 
-                isCutting = !isCutting;
+                m_fields->isCutting = !m_fields->isCutting;
             }
         }
 
@@ -39,7 +44,7 @@ class $modify(PlayerObject) {
         if (m_regularTrail) {
             auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
             if (streak) {
-                streak->streakActive = true; // Enable cutting logic
+                streakStates[streak] = true; // Enable cutting logic
             }
         }
     }
@@ -50,7 +55,7 @@ class $modify(PlayerObject) {
         if (m_regularTrail) {
             auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
             if (streak) {
-                streak->streakActive = false; // Disable cutting logic
+                streakStates[streak] = false; // Disable cutting logic
             }
         }
     }
