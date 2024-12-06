@@ -44,7 +44,7 @@ class $modify(PlayerObject) {
         if (m_regularTrail) {
             auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
             if (streak) {
-                streakStates[streak] = true; // Activate cutting logic
+                streakStates[streak] = true; // Activate trail cutting
             }
         }
     }
@@ -55,7 +55,7 @@ class $modify(PlayerObject) {
         if (m_regularTrail) {
             auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
             if (streak) {
-                streakStates[streak] = false; // Deactivate cutting logic
+                streakStates[streak] = false; // Deactivate trail cutting
             }
         }
     }
@@ -63,35 +63,29 @@ class $modify(PlayerObject) {
     void update(float delta) {
         PlayerObject::update(delta);
 
-        // Determine if we should enable or disable the trail cutting
+        // Determine mode and ground status
         bool isAirMode = m_isShip || m_isSwing || m_isDart;  // Air gamemodes
         bool isGroundMode = !isAirMode;                     // Non-air gamemodes
         bool onGround = m_isOnGround || m_hasGroundParticles;
 
-        if (isAirMode) {
-            // Always enable cutting for air modes
+        if (isGroundMode) {
+            if (onGround) {
+                // Disable trail (and cutting) when on the ground
+                if (m_regularTrail) {
+                    auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
+                    if (streak) {
+                        streakStates[streak] = false; // Deactivate cutting
+                    }
+                }
+            } 
+            // Trail cutting should only exist when activateStreak() explicitly triggers it
+            // No action needed for being airborne alone
+        } else if (isAirMode) {
+            // Air gamemodes: Always enable trail cutting
             if (m_regularTrail) {
                 auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
                 if (streak) {
                     streakStates[streak] = true; // Enable cutting logic
-                }
-            }
-        } else if (isGroundMode) {
-            if (onGround) {
-                // Disable cutting logic when on the ground
-                if (m_regularTrail) {
-                    auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
-                    if (streak) {
-                        streakStates[streak] = false; // Disable cutting logic
-                    }
-                }
-            } else {
-                // Re-enable cutting logic when airborne in ground mode
-                if (m_regularTrail) {
-                    auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
-                    if (streak) {
-                        streakStates[streak] = true; // Enable cutting logic
-                    }
                 }
             }
         }
