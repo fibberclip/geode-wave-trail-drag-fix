@@ -1,52 +1,48 @@
-#include <Geode/Geode.hpp>
-#include <Geode/modify/CCMotionStreak.hpp>
+class $modify(PlayerObject) {
+    void update(float delta) {
+        PlayerObject::update(delta); // Call the original update method
 
-using namespace geode::prelude;
-
-class $modify(CCMotionStreak)
-{
-    struct Fields {
-        float elapsedTime = 0.0f;    // Tracks the elapsed time
-        float cutInterval = 0.2f;    // Interval for the trail cutting
-        bool isCutting = false;      // Indicates whether the trail is currently being cut
-    };
-
-    virtual void update(float delta) {
-        // Call the base update first to ensure proper behavior
-        CCMotionStreak::update(delta);
-
-        // Check if the trail is active (i.e., has points and is currently drawing)
-        if (m_uNuPoints > 0 && m_bStroke) {
-            // Update elapsed time for cutting interval
-            m_fields->elapsedTime += delta;
-
-            if (m_fields->elapsedTime >= m_fields->cutInterval) {
-                m_fields->elapsedTime -= m_fields->cutInterval; // Reset the timer
-
-                // Toggle the cutting state and apply stop/resume accordingly
-                if (m_fields->isCutting) {
-                    this->resumeStroke(); // Smoothly resume the trail
-                } else {
-                    this->stopStroke(); // Smoothly stop the trail
+        // Check if the player is in a ground gamemode and touching the ground
+        if ((m_hasGroundParticles || m_isOnGround || m_isOnGround2 || m_isOnGround3 || m_isOnGround4) &&
+            !m_isShip && !m_isSwing && !m_isDart) {
+            // Ground mode and touching the ground
+            if (m_regularTrail) {
+                auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
+                if (streak) {
+                    streakStates[streak] = false; // Disable cutting logic
+                    streak->stopStroke();        // Ensure the trail stops
                 }
-
-                m_fields->isCutting = !m_fields->isCutting; // Flip the state
             }
         } else {
-            // Reset cutting state if the trail isn't active
-            if (m_fields->isCutting) {
-                this->resumeStroke(); // Ensure the trail is resumed when it was active
-                m_fields->isCutting = false;
+            // In an air gamemode or not touching the ground
+            if (m_regularTrail) {
+                auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
+                if (streak) {
+                    streakStates[streak] = true; // Enable cutting logic
+                }
             }
         }
     }
 
-    virtual void draw() {
-        // Call the original draw method to ensure normal behavior
-        if (m_bStroke) {
-            CCMotionStreak::draw();
-        } else {
-            // Custom behavior when the trail isn't active (optional)
+    void activateStreak() {
+        PlayerObject::activateStreak(); // Call the original method
+
+        if (m_regularTrail) {
+            auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
+            if (streak) {
+                streakStates[streak] = true; // Enable cutting logic initially
+            }
+        }
+    }
+
+    void resetStreak() {
+        PlayerObject::resetStreak(); // Call the original method
+
+        if (m_regularTrail) {
+            auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
+            if (streak) {
+                streakStates[streak] = false; // Disable cutting logic
+            }
         }
     }
 };
