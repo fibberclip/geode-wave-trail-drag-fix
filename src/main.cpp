@@ -71,6 +71,7 @@ class $modify(PlayerObject) {
                 auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
                 if (streak) {
                     streakStates[streak] = false; // Disable cutting logic
+                    m_regularTrail->CCMotionStreak::stopStroke();
                 }
             }
         } else {
