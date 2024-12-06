@@ -47,36 +47,8 @@ class $modify(CCMotionStreak) {
 };
 
 class $modify(PlayerObject) {
-    void activateStreak() {
-        PlayerObject::activateStreak(); // Call the original method
-
-        if (m_regularTrail) {
-            auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
-            if (streak) {
-                streakStates[streak] = true; // Activate the streak
-                cuttingStates[streak] = false; // Reset cutting state when activated
-                streak->resumeStroke();      // Start cutting effect
-                streak->setVisible(true);    // Make sure the trail is visible
-            }
-        }
-    }
-
-    void resetStreak() {
-        PlayerObject::resetStreak(); // Call the original method
-
-        if (m_regularTrail) {
-            auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
-            if (streak) {
-                streakStates[streak] = false; // Deactivate the streak
-                cuttingStates[streak] = false; // Reset cutting state
-                streak->stopStroke();         // Stop cutting effect
-                streak->setVisible(false);    // Hide the trail
-            }
-        }
-    }
-
     void update(float p0) {
-        PlayerObject::update(p0); // Call the original update function
+        PlayerObject::update(p0); // Call the original update function with the correct parameter
 
         // Disable cutting effect when on the ground with certain gamemodes
         if ((m_isBall || m_isRobot || m_isSpider) && m_isOnGround) {
