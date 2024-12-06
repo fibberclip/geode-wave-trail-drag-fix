@@ -1,9 +1,16 @@
 #include <Geode/Geode.hpp>
+#include <Geode/loader/SettingV3.hpp>
 #include <Geode/modify/PlayerObject.hpp>
 #include <Geode/modify/CCMotionStreak.hpp>
 #include <unordered_map>
 
 using namespace geode::prelude;
+
+$execute {
+    listenForSettingChanges("cutting-freq", [](double value) {
+        // ekisde lol jajajaj
+    });
+}
 
 // Static map to associate CCMotionStreak instances with their states
 static std::unordered_map<CCMotionStreak*, bool> streakStates;
