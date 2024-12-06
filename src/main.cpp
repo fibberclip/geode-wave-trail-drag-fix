@@ -8,7 +8,7 @@ using namespace geode::prelude;
 // Static map to associate CCMotionStreak instances with their states
 static std::unordered_map<CCMotionStreak*, bool> streakStates;
 auto cuttingMode = Mod::get()->getSettingValue<std::string>("cutting-mode");
-auto cutFreq = Mod::get()->getSettingValue<int64_t>("cutting-freq");
+auto cutFreq = Mod::get()->getSettingValue<float>("cutting-freq");
 
 class $modify(CCMotionStreak) {
     struct Fields {
