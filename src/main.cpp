@@ -1,52 +1,86 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PlayerObject.hpp>
 #include <Geode/modify/CCMotionStreak.hpp>
+#include <unordered_map>
 
-using namespace geode;
-using namespace cocos2d;
+using namespace geode::prelude;
 
-class $modify(CCMotionStreak) : public CCMotionStreak {
+// Static map to associate CCMotionStreak instances with their states
+static std::unordered_map<CCMotionStreak*, bool> streakStates;
+
+class $modify(CCMotionStreak) {
     struct Fields {
-        // Add custom fields if needed
+        float elapsedTime = 0.0f;
+        float cutInterval = 0.2f;
+        bool isCutting = false;
     };
 
-    void stopStroke() {
-        // Custom logic for stopping the stroke
-        CCMotionStreak::reset();
-    }
+    virtual void update(float delta) {
+        if (streakStates[this]) {
+            m_fields->elapsedTime += delta;
 
-    void resumeStroke() {
-        // Custom logic for resuming the stroke
-        CCMotionStreak::setOpacity(255); // Example functionality
+            if (m_fields->elapsedTime >= m_fields->cutInterval) {
+                m_fields->elapsedTime -= m_fields->cutInterval;
+
+                if (m_fields->isCutting) {
+                    this->stopStroke();
+                } else {
+                    this->resumeStroke();
+                }
+
+                m_fields->isCutting = !m_fields->isCutting;
+            }
+        }
+
+        CCMotionStreak::update(delta);
     }
 };
 
-class $modify(PlayerObject) : public PlayerObject {
-    struct Fields {
-        bool trailCuttingEnabled = false; // Example custom field
-        float cuttingInterval = 0.4f; // Default time interval for trail cutting
-        float timeSinceLastCut = 0.0f; // Time tracker
-    };
+class $modify(PlayerObject) {
+    void activateStreak() {
+        PlayerObject::activateStreak();
 
-    void update(float delta) {
-        PlayerObject::update(delta); // Call the original update method
-
-        // Custom logic to simulate trail cutting
-        auto& fields = m_fields();
-        fields.timeSinceLastCut += delta;
-
-        if (fields.trailCuttingEnabled && fields.timeSinceLastCut >= fields.cuttingInterval) {
-            auto streak = dynamic_cast<CCMotionStreak*>(this->getChildByTag(123)); // Replace with the actual tag or logic
+        if (m_regularTrail) {
+            auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
             if (streak) {
-                streak->stopStroke();
-                streak->resumeStroke();
+                streakStates[streak] = true;
             }
-            fields.timeSinceLastCut = 0.0f;
         }
     }
 
-    void toggleTrailCutting() {
-        auto& fields = m_fields();
-        fields.trailCuttingEnabled = !fields.trailCuttingEnabled;
+    void resetStreak() {
+        PlayerObject::resetStreak();
+
+        if (m_regularTrail) {
+            auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
+            if (streak) {
+                streakStates[streak] = false;
+            }
+        }
+    }
+
+    void update(float delta) {
+        PlayerObject::update(delta);
+
+        // Determine if the trail cutting logic should be disabled
+        bool isGroundMode = !m_isShip && !m_isSwing && !m_isDart;
+        bool onGround = m_isOnGround || m_hasGroundParticles;
+
+        if (isGroundMode && onGround) {
+            if (m_regularTrail) {
+                auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
+                if (streak) {
+                    streakStates[streak] = false; // Disable cutting logic
+                }
+            }
+        } else {
+            // Enable cutting logic when not on ground in an air mode
+            if (m_regularTrail) {
+                auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
+                if (streak) {
+                    streakStates[streak] = true;
+                }
+            }
+        }
     }
 };
