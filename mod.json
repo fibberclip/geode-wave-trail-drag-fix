@@ -3,9 +3,8 @@
   "gd": {"android": "2.2074", "win": "2.2074"},
   "version": "v1.0.0",
   "id": "saritahhh.trailcut",
-  "name": "Trail Cutting",
+  "name": "Fool's Trail Cutting",
   "developer": "Saritahhh",
   "description": "GD if it was good",
-  "repository": "https://github.com/fibberclip/geode-ball-rotation-bug",
   "tags": ["offline", "gameplay", "customization"]
 }
