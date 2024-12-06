@@ -62,24 +62,24 @@ class $modify(PlayerObject) {
     void update(float delta) {
         PlayerObject::update(delta);
 
-        // Determine if the trail cutting logic should be disabled
+        // Determine if the trail cutting logic should be disabled or enabled
         bool isGroundMode = !m_isShip && !m_isSwing && !m_isDart;
         bool onGround = m_isOnGround || m_hasGroundParticles;
 
-        if (isGroundMode && onGround) {
+        if (isGroundMode) {
+            // Ground gamemodes should always disable cutting
             if (m_regularTrail) {
                 auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
                 if (streak) {
                     streakStates[streak] = false; // Disable cutting logic
-                    m_regularTrail->CCMotionStreak::stopStroke();
                 }
             }
         } else {
-            // Enable cutting logic when not on ground in an air mode
+            // Air gamemodes enable cutting logic
             if (m_regularTrail) {
                 auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
                 if (streak) {
-                    streakStates[streak] = true;
+                    streakStates[streak] = !onGround; // Enable cutting only when not on ground
                 }
             }
         }
