@@ -23,11 +23,11 @@ class $modify(CCMotionStreak)
             if (m_fields->elapsedTime >= m_fields->cutInterval) {
                 m_fields->elapsedTime -= m_fields->cutInterval; // Reset the timer
 
-                // Toggle the cutting state
+                // Toggle the cutting state and apply stop/resume accordingly
                 if (m_fields->isCutting) {
-                    this->resumeStroke(); // Resume the trail
+                    this->resumeStroke(); // Smoothly resume the trail
                 } else {
-                    this->stopStroke(); // Temporarily stop the trail
+                    this->stopStroke(); // Smoothly stop the trail
                 }
 
                 m_fields->isCutting = !m_fields->isCutting; // Flip the state
@@ -46,7 +46,7 @@ class $modify(CCMotionStreak)
         if (m_bStroke) {
             CCMotionStreak::draw();
         } else {
-            // Optionally, add custom behavior for when the trail isn't active
+            // Custom behavior when the trail isn't active (optional)
         }
     }
 };
