@@ -6,6 +6,7 @@
 using namespace geode::prelude;
 
 static std::unordered_map<CCMotionStreak*, bool> streakStates;
+static std::unordered_map<CCMotionStreak*, bool> cuttingStates; // Track cutting state
 
 class $modify(CCMotionStreak) {
     struct Fields {
@@ -31,6 +32,7 @@ class $modify(CCMotionStreak) {
                 }
 
                 m_fields->isCutting = !m_fields->isCutting; // Toggle state
+                cuttingStates[this] = m_fields->isCutting; // Update cutting state
             }
         }
         else {
@@ -38,6 +40,7 @@ class $modify(CCMotionStreak) {
             this->stopStroke();
             m_fields->isCutting = false; // Reset cutting state
             this->setVisible(false); // Hide trail when inactive
+            cuttingStates[this] = false; // Reset cutting state
         }
 
         CCMotionStreak::update(delta); // Call the original update method
@@ -52,6 +55,7 @@ class $modify(PlayerObject) {
             auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
             if (streak) {
                 streakStates[streak] = true; // Activate the streak
+                cuttingStates[streak] = false; // Reset cutting state when activated
                 streak->resumeStroke();      // Start cutting effect
                 streak->setVisible(true);    // Make sure the trail is visible
             }
@@ -65,6 +69,7 @@ class $modify(PlayerObject) {
             auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
             if (streak) {
                 streakStates[streak] = false; // Deactivate the streak
+                cuttingStates[streak] = false; // Reset cutting state
                 streak->stopStroke();         // Stop cutting effect
                 streak->setVisible(false);    // Hide the trail
             }
