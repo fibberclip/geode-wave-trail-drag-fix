@@ -6,22 +6,19 @@
 
 using namespace geode::prelude;
 
-// Static map to associate CCMotionStreak instances with their states
 static std::unordered_map<CCMotionStreak*, bool> streakStates;
 
-// Global settings for cutting frequency and mode
-static double cutFreq = 0.2; // Default frequency
-static std::string cuttingMode = "stopStroke"; // Default cutting mode
+static double cutFreq = 0.2; 
+static std::string cuttingMode = "stopStroke"; 
 
-// Listen for changes to settings at mod load time
 $execute {
     listenForSettingChanges("cutting-freq", [](double value) {
-        cutFreq = value; // Update frequency dynamically
+        cutFreq = value; 
         CCLOG("Cutting Frequency updated: %f", cutFreq);
     });
 
     listenForSettingChanges("cutting-mode", [](std::string value) {
-        cuttingMode = value; // Update cutting mode dynamically
+        cuttingMode = value; 
         CCLOG("Cutting Mode updated: %s", cuttingMode.c_str());
     });
 }
@@ -33,15 +30,15 @@ class $modify(CCMotionStreak) {
     };
 
     virtual void update(float delta) {
-        // If this streak is active for cutting logic
+
         if (streakStates[this]) {
             m_fields->elapsedTime += delta;
 
-            if (m_fields->elapsedTime >= cutFreq) { // Use dynamic frequency
+            if (m_fields->elapsedTime >= cutFreq) { 
                 m_fields->elapsedTime -= cutFreq;
 
                 if (m_fields->isCutting) {
-                    // Use dynamic cutting mode
+
                     if (cuttingMode == "stopStroke") {
                         this->stopStroke();
                     } else if (cuttingMode == "reset") {
@@ -60,52 +57,25 @@ class $modify(CCMotionStreak) {
 };
 
 class $modify(PlayerObject) {
-    void bumpPlayer(float p0, int p1, bool p2, GameObject* p3) {
-        // Call the original bumpPlayer functionality
-        PlayerObject::bumpPlayer(p0, p1, p2, p3);
-
-        // Trigger the trail logic if in an air mode
-        if (!this->m_isOnGround && !this->m_isOnGround2 && !this->m_isOnGround3 && !this->m_isOnGround4) {
-            this->activateStreak();
-        }
-    }
-
-    void flipGravity(bool p0, bool p1) {
-        // Call the original flipGravity functionality
-        PlayerObject::flipGravity(p0, p1);
-
-        // Trigger the trail logic if in an air mode
-        if (!this->m_isOnGround && !this->m_isOnGround2 && !this->m_isOnGround3 && !this->m_isOnGround4) {
-            this->activateStreak();
-        }
-    }
-
     void activateStreak() {
-        // Call the original activateStreak method
         PlayerObject::activateStreak();
 
-        // Ensure trail cutting is only enabled in appropriate situations
         if (m_regularTrail) {
             auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
-
-            // Activate trail cutting only for valid air modes
-            if (streak && (m_isShip || m_isDart || m_isSwing)) {
-                streakStates[streak] = true; // Enable trail cutting
+            if (streak) {
+                streakStates[streak] = true; 
             }
         }
     }
 
     void resetStreak() {
-        // Call the original resetStreak method
         PlayerObject::resetStreak();
 
-        // Ensure trail cutting is disabled when the streak is reset
         if (m_regularTrail) {
             auto streak = reinterpret_cast<CCMotionStreak*>(m_regularTrail);
             if (streak) {
-                streakStates[streak] = false; // Disable trail cutting
+                streakStates[streak] = false; 
             }
         }
     }
 };
-
