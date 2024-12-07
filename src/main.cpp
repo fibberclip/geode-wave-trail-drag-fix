@@ -11,7 +11,7 @@ static std::unordered_map<CCMotionStreak*, bool> streakStates;
 class $modify(CCMotionStreak) {
     struct Fields {
         float elapsedTime = 0.0f;
-        float cutInterval = 0.15f;
+        float cutInterval = 0.2f;
         bool isCutting = false;
     };
 
